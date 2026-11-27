@@ -1,0 +1,2 @@
+customer_code,customer_name,abn_or_pan,payment_terms_days,status
+CUST-001,Example Hospital Supplies (SYNTHETIC),,30,active

@@ -1,0 +1,14 @@
+# secrets and local config
+.env
+*.env.local
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+backend/var/
+# node
+frontend/node_modules/
+frontend/.next/
+frontend/*.tsbuildinfo
+# e2e artefacts are regenerated
+e2e/screenshots/

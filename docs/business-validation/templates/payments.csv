@@ -1,0 +1,2 @@
+payment_date,customer_code,customer_name,amount,currency,reference,method
+2026-02-01,CUST-001,Example Hospital Supplies (SYNTHETIC),500.00,AUD,INV-1001 part,bank transfer

@@ -55,3 +55,45 @@ All monetary calculations occur in backend domain services. The frontend display
 
 ## Deployment model
 Separate development, staging and production. Production data must not be copied into development or staging without an approved anonymisation process.
+
+---
+
+## As built — Release 1 (2026-11-27)
+
+The proposed architecture above was implemented without deviation except where noted in `docs/09-decisions/architecture-decisions.md`.
+
+```
+Browser ──HTTPS──▶ Next.js web app (frontend/)  ── /api/* proxied ──▶ FastAPI (backend/app)
+                                                                         │
+                       ┌─────────────────────────────────────────────────┤
+                       ▼                         ▼                       ▼
+              PostgreSQL 16 (RLS on)     Private file storage      Email adapter
+              migrations: Alembic        (local disk adapter;      (dev outbox only;
+                                          S3 adapter pending)       provider pending)
+```
+
+### Code layout (modular monolith)
+| Layer | Location | Responsibility |
+|---|---|---|
+| Web client | `frontend/app`, `frontend/components` | Presentation only. Money arrives as exact strings and is formatted as text. |
+| API | `backend/app/api` | Authentication, CSRF, organisation membership, permissions, request validation, tenant context. |
+| Domain | `backend/app/domain` | Pure, deterministic calculations: money parsing/rounding, balances, ageing, behaviour metrics. |
+| Services | `backend/app/services` | Business workflows: identity, organisations, customers, imports, ledger (invoices, credits, payments, allocations), matching, reporting, audit. |
+| Persistence | `backend/app/models`, `backend/migrations` | SQLAlchemy models, Alembic migrations, RLS policies and integrity triggers. |
+
+### Domain modules built
+1–6 and 8–9 from the list above. Module 7 (cash-flow forecasting) is Release 2 and was not started. Background processing runs in-request for Release 1 (ADR-004).
+
+### Dependencies (backend)
+| Package | Why | Maintenance note |
+|---|---|---|
+| fastapi, uvicorn | API framework and server (approved stack) | Widely maintained |
+| sqlalchemy, psycopg, alembic | ORM, PostgreSQL driver, migrations | Standard Python/PostgreSQL toolchain |
+| pydantic-settings, email-validator | Typed configuration and input validation | FastAPI ecosystem |
+| argon2-cffi | Password hashing (argon2id) | Security-critical; keep patched |
+| pyotp | TOTP two-factor codes (RFC 6238) | Small, stable |
+| openpyxl | Read XLSX imports (values only; no macros) | Parsing untrusted files; keep patched |
+| python-multipart | File uploads | Required by FastAPI for forms |
+
+### Dependencies (frontend)
+`next`, `react`, `react-dom` only (plus TypeScript and type packages for development). No UI kit, charting or state library.

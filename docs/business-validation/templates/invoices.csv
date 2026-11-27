@@ -1,0 +1,2 @@
+invoice_number,customer_code,customer_name,issue_date,due_date,currency,net_amount,tax_amount,total_amount,amount_due,status,reference
+INV-1001,CUST-001,Example Hospital Supplies (SYNTHETIC),2026-01-05,2026-02-04,AUD,1000.00,100.00,1100.00,1100.00,open,PO-555

@@ -1,0 +1,2 @@
+report_date,customer_code,customer_name,current,days_1_30,days_31_60,days_61_90,days_over_90,total
+2026-03-31,CUST-001,Example Hospital Supplies (SYNTHETIC),0.00,0.00,500.00,0.00,0.00,500.00

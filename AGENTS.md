@@ -1,6 +1,6 @@
 # Shared coding-agent instructions
 
-TradeFlow Intelligence is a multi-tenant financial operations SaaS for B2B wholesalers and distributors.
+Vittasynx is a multi-tenant financial operations SaaS for B2B wholesalers and distributors.
 
 Before work:
 1. Read `README.md`.

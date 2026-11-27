@@ -21,7 +21,15 @@
 - Unapplied amounts remain visible.
 - Allocation changes are auditable.
 
-## Cash forecast
+## Release 1 additions (approved D-23)
+- Re-importing a changed invoice creates an amendment candidate, never a silent overwrite or duplicate.
+- Every dashboard figure shows the reporting date and reconciles to invoice-level balances.
+- Unapplied payments and credits are shown separately from outstanding receivables.
+- Behaviour metrics show sample size and period, and display "insufficient data" below the threshold.
+- Foreign-currency and over-precision rows are rejected with actionable reasons.
+- Exports match on-screen totals for the same reporting date.
+
+## Cash forecast (Release 2 — not in the current build)
 - Forecast shows opening cash, inflows, outflows and closing cash by period.
 - Each material item has source, expected date and status.
 - Confirmed, estimated and scenario-only values are visually distinct.

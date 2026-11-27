@@ -1,10 +1,32 @@
 # Product requirements
 
-## Users
-- Owner / business administrator
-- Finance manager
-- Accounts receivable officer
-- Read-only manager or advisor
+## Users and roles (approved D-03)
+- Organisation Owner
+- Administrator
+- Finance Manager
+- Accounts Receivable Officer
+- Read-only User
+
+There is exactly one Owner per organisation. Platform support staff have no access to tenant data in Release 1.
+
+### Permission matrix (backend-enforced)
+| Action | Owner | Admin | Finance Mgr | AR Officer | Read-only |
+|---|---|---|---|---|---|
+| View dashboard, invoices, customers, payments | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Export reports | ✔ | ✔ | ✔ | ✔ | — |
+| Create/edit customers | ✔ | ✔ | ✔ | ✔ | — |
+| Upload, map and confirm an import | ✔ | ✔ | ✔ | ✔ | — |
+| Approve a source amendment to an existing invoice | ✔ | ✔ | ✔ | — | — |
+| Record manual payment | ✔ | ✔ | ✔ | ✔ | — |
+| Confirm allocation | ✔ | ✔ | ✔ | ✔ | — |
+| Reverse a confirmed allocation | ✔ | ✔ | ✔ | — | — |
+| Record credit note, cancel/dispute invoice | ✔ | ✔ | ✔ | — | — |
+| View audit log | ✔ | ✔ | ✔ | — | — |
+| Invite/remove users, change roles | ✔ | ✔ | — | — | — |
+| Organisation settings | ✔ | ✔ | — | — | — |
+| Transfer ownership, delete organisation | ✔ | — | — | — | — |
+
+An Administrator cannot remove, demote or change the Owner.
 
 ## Primary jobs
 - Import current invoices and transaction data.
@@ -48,8 +70,9 @@
 - Display sample size and observation period.
 - Do not present a prediction as a verified fact.
 - Do not calculate a meaningful behavioural indicator when data is insufficient.
+- Metric definitions and thresholds: `docs/03-business-rules/financial-calculations.md` §Customer payment behaviour.
 
-### Cash forecast
+### Cash forecast (Release 2 — not in the current build)
 - Display a rolling 13-week forecast.
 - Separate opening cash, expected receipts and expected outflows.
 - Distinguish confirmed, scheduled, estimated and scenario-only values.

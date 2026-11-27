@@ -1,7 +1,7 @@
 # Product vision
 
 ## Product definition
-TradeFlow Intelligence is a financial operations intelligence platform for inventory-led B2B wholesalers and distributors. It helps owners and finance teams understand receivables, customer payment behaviour, upcoming supplier obligations and near-term liquidity.
+Vittasynx is a financial operations intelligence platform for inventory-led B2B wholesalers and distributors. It helps owners and finance teams understand receivables, customer payment behaviour, upcoming supplier obligations and near-term liquidity.
 
 ## Problem
 A distributor may have accounting records and spreadsheets but still struggle to answer:

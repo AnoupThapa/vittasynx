@@ -1,0 +1,3 @@
+date,description,debit,credit,balance,reference
+2026-02-01,DIRECT CREDIT EXAMPLE HOSPITAL INV-1001,,500.00,12500.00,INV-1001
+2026-02-02,SUPPLIER PAYMENT (outflow - skipped),300.00,,12200.00,

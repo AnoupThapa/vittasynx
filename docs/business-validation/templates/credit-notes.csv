@@ -1,0 +1,2 @@
+credit_note_number,customer_code,customer_name,credit_date,currency,amount,applies_to_invoice,reason
+CN-2001,CUST-001,Example Hospital Supplies (SYNTHETIC),2026-01-20,AUD,100.00,INV-1001,damaged goods

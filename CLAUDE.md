@@ -1,7 +1,7 @@
 # Claude Code project instructions
 
 ## Product context
-Build TradeFlow Intelligence, a multi-tenant SaaS for B2B wholesalers and distributors. The MVP provides receivables intelligence and a transparent 13-week cash forecast. This is financial operations software, not accounting software.
+Build Vittasynx, a multi-tenant SaaS for B2B wholesalers and distributors. Release 1 provides receivables intelligence. A transparent 13-week cash forecast follows in Release 2, only after the receivables module passes Phase 6 testing (see `docs/00-project/scope.md` and `docs/00-project/master-build-instruction.md`). This is financial operations software, not accounting software.
 
 ## Required reading
 Before changing product behaviour or architecture, read:
@@ -51,7 +51,9 @@ If instructions conflict or are incomplete, explain the conflict and request a d
 - Avoid premature microservices. Start with a modular monolith unless an approved decision says otherwise.
 
 ## AI use
-AI may assist with document extraction, transaction description classification and plain-language explanations of already-calculated results.
+Release 1 uses no AI processing of customer financial data (decision D-19). Payment match suggestions are deterministic rules. Any future AI use needs an approved provider review (`docs/04-security/data-privacy.md`).
+
+When approved, AI may assist with document extraction, transaction description classification and plain-language explanations of already-calculated results.
 AI must not:
 - create or modify financial records without explicit user confirmation
 - allocate uncertain payments automatically
@@ -68,7 +70,7 @@ Every AI-derived field must carry provenance and a confidence/review state.
 5. Add or update tests.
 6. Run relevant tests and report exact results.
 7. Review tenant isolation, permissions and financial integrity.
-8. Update documentation and changelog where relevant.
+8. Update documentation, `CHANGELOG.md` and `docs/reviews/project-progress.md` where relevant.
 
 Do not begin a broad rewrite when a focused change is sufficient.
 
