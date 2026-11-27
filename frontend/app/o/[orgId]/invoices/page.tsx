@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { apiGet, downloadUrl } from "@/lib/api";
 import { asAtQuery, useOrg } from "@/components/OrgContext";
 import { ReportingDate } from "@/components/ReportingDate";
+import { AddInvoice } from "@/components/AddInvoice";
 import { Empty, ErrorNotice, Loading, Money, StatusBadge, useLoad } from "@/components/ui";
 import { BUCKET_LABELS, formatDate } from "@/lib/format";
 
@@ -23,7 +24,8 @@ function Invoices() {
   if (dueFrom) query.set("due_from", dueFrom);
   if (dueTo) query.set("due_to", dueTo);
   const qs = query.toString();
-  const { data, error, loading } = useLoad(() => apiGet(`${base}/invoices?${qs}`), [base, qs]);
+  const { data, error, loading, reload } = useLoad(() => apiGet(`${base}/invoices?${qs}`), [base, qs]);
+  const [adding, setAdding] = useState(false);
 
   return (
     <>
@@ -32,8 +34,10 @@ function Invoices() {
         <div className="toolbar">
           <ReportingDate shown={data?.reporting_date} />
           {can("export") && <a className="btn" href={downloadUrl(`${base}/exports/invoices.csv${asAtQuery(asAt)}`)}>Export CSV</a>}
+          {can("create_invoice") && <button className={adding ? "" : "primary"} onClick={() => setAdding(!adding)}>{adding ? "Close" : "Add invoice"}</button>}
         </div>
       </div>
+      {adding && <div style={{ maxWidth: 560 }}><AddInvoice onCreated={reload} /></div>}
       <div className="panel">
         <div className="inline">
           <div className="field"><label htmlFor="q">Search</label><input id="q" placeholder="Invoice number or customer" value={q} onChange={(e) => setQ(e.target.value)} /></div>

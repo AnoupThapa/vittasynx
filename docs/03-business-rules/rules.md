@@ -112,3 +112,12 @@ Draft invoices are rejected at import. Imported status text is mapped to these v
 
 ### 8.11 Write-offs (D-12)
 No write-off workflow in Release 1. Use a credit note with reason "write-off".
+
+### 8.12 Manual invoice entry (owner request, 2026-11-27)
+Invoices can be entered one at a time in the app as well as imported. Manual entry follows the same rules as import; it is not a shortcut around them.
+- **Who:** Owner, Administrator, Finance Manager, Accounts Receivable Officer (same roles as importing).
+- **Required:** existing customer, invoice number, issue date, due date (on or after issue date), and total amount (incl. tax), or net and tax amounts from which the total is derived.
+- **Validation:** organisation currency only; amounts at currency precision and never rounded; total ≥ 0; if total, net and tax are all given, net + tax must equal total.
+- **Duplicates:** the same customer and normalised number as an existing invoice is refused (409). The same number under a different customer is refused unless the user confirms it is a separate invoice.
+- **Record:** `entry_method = manual`, version 1 recorded with reason "entered manually", audit event `invoice.created_manual`.
+- **Corrections:** entered invoices are not edited in place. Use the status change (cancel or void, with a reason) and re-enter, or a credit note, so history stays intact.

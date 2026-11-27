@@ -16,6 +16,7 @@ There is exactly one Owner per organisation. Platform support staff have no acce
 | Export reports | ✔ | ✔ | ✔ | ✔ | — |
 | Create/edit customers | ✔ | ✔ | ✔ | ✔ | — |
 | Upload, map and confirm an import | ✔ | ✔ | ✔ | ✔ | — |
+| Enter an invoice manually | ✔ | ✔ | ✔ | ✔ | — |
 | Approve a source amendment to an existing invoice | ✔ | ✔ | ✔ | — | — |
 | Record manual payment | ✔ | ✔ | ✔ | ✔ | — |
 | Confirm allocation | ✔ | ✔ | ✔ | ✔ | — |

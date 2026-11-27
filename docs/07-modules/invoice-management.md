@@ -8,3 +8,6 @@
 - Status changes (Finance Manager+): open ↔ disputed; open/disputed → cancelled or void (only with no confirmed allocations). A reason is required and audited.
 - "Paid" and "Overdue" are derived from balances and dates, never stored or imported.
 - Credit notes are separate records (see payment-management.md).
+
+## Manual entry
+An **Add invoice** form on the Invoices page (AR Officer and above) creates one invoice at a time under the rules in `rules.md` §8.12: same validation as import, duplicates refused, no in-place edits.
