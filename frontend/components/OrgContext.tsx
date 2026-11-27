@@ -28,11 +28,11 @@ export type OrgCtx = {
 };
 
 export type Action =
-  | "export" | "manage_customers" | "import" | "approve_amendment" | "record_payment" | "confirm_allocation"
+  | "export" | "manage_customers" | "import" | "create_invoice" | "approve_amendment" | "record_payment" | "confirm_allocation"
   | "reverse_allocation" | "manage_credits_and_status" | "view_audit" | "manage_members" | "manage_settings"
   | "owner_actions";
 
-const ALL: Action[] = ["export", "manage_customers", "import", "approve_amendment", "record_payment",
+const ALL: Action[] = ["export", "manage_customers", "import", "create_invoice", "approve_amendment", "record_payment",
   "confirm_allocation", "reverse_allocation", "manage_credits_and_status", "view_audit", "manage_members",
   "manage_settings", "owner_actions"];
 const FINANCE = ALL.filter((a) => !["manage_members", "manage_settings", "owner_actions"].includes(a));
@@ -40,7 +40,7 @@ const ROLE_ACTIONS: Record<string, Action[]> = {
   owner: ALL,
   admin: ALL.filter((a) => a !== "owner_actions"),
   finance_manager: FINANCE,
-  ar_officer: ["export", "manage_customers", "import", "record_payment", "confirm_allocation"],
+  ar_officer: ["export", "manage_customers", "import", "create_invoice", "record_payment", "confirm_allocation"],
   read_only: [],
 };
 

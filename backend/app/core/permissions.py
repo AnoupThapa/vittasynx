@@ -7,6 +7,7 @@ class Perm(str, Enum):
     EXPORT = "export"
     MANAGE_CUSTOMERS = "manage_customers"
     IMPORT = "import"
+    CREATE_INVOICE = "create_invoice"
     APPROVE_AMENDMENT = "approve_amendment"
     RECORD_PAYMENT = "record_payment"
     CONFIRM_ALLOCATION = "confirm_allocation"
@@ -25,6 +26,7 @@ _AR = {
     Perm.EXPORT,
     Perm.MANAGE_CUSTOMERS,
     Perm.IMPORT,
+    Perm.CREATE_INVOICE,
     Perm.RECORD_PAYMENT,
     Perm.CONFIRM_ALLOCATION,
 }

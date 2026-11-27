@@ -6,6 +6,7 @@
 - Pull request template enforcing the five principles and author ≠ reviewer.
 - CI: backend, frontend and end-to-end tests on every pull request.
 - Hardening: rate limiting, MFA recovery codes, SMTP email adapter, database file storage, separate database roles script (migration 0003).
+- Manual invoice entry with the same validation as import (rules.md §8.12; migration 0004).
 
 ## 0.1.0 — 2026-11-27 (Release 1 build, not deployed)
 

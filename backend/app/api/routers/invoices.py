@@ -21,6 +21,18 @@ class StatusIn(BaseModel):
     reason: str = Field(min_length=1, max_length=300)
 
 
+class InvoiceIn(BaseModel):
+    customer_id: uuid.UUID
+    invoice_number: str = Field(min_length=1, max_length=100)
+    issue_date: date
+    due_date: date
+    total_amount: str | None = Field(default=None, max_length=30)
+    net_amount: str | None = Field(default=None, max_length=30)
+    tax_amount: str | None = Field(default=None, max_length=30)
+    reference: str | None = Field(default=None, max_length=200)
+    confirm_duplicate_number: bool = False
+
+
 class CreditNoteIn(BaseModel):
     customer_id: uuid.UUID
     credit_note_number: str = Field(min_length=1, max_length=100)
@@ -48,6 +60,18 @@ def list_invoices(as_at: date | None = None, customer_id: uuid.UUID | None = Non
     return {"reporting_date": r.isoformat(), "currency": ctx.org.currency, "items": items}
 
 
+@router.post("/invoices", status_code=201)
+def create_invoice(body: InvoiceIn, ctx: OrgContext = Depends(require(Perm.CREATE_INVOICE))) -> dict:
+    inv = ledger.create_invoice_manual(ctx.db, ctx.org, ctx.user.id, customer_id=body.customer_id,
+                                       invoice_number=body.invoice_number, issue_date=body.issue_date,
+                                       due_date=body.due_date, total_amount=body.total_amount,
+                                       net_amount=body.net_amount, tax_amount=body.tax_amount,
+                                       reference=body.reference, confirm_duplicate_number=body.confirm_duplicate_number)
+    ctx.db.commit()
+    return {"id": str(inv.id), "invoice_number": inv.invoice_number, "total_amount": fmt(inv.total_amount, inv.currency),
+            "total_is_derived": inv.total_is_derived, "entry_method": inv.entry_method}
+
+
 @router.get("/invoices/{invoice_id}")
 def get_invoice(invoice_id: uuid.UUID, as_at: date | None = None, ctx: OrgContext = Depends(require(Perm.VIEW))) -> dict:
     r = reporting_date(ctx, as_at)
@@ -66,6 +90,7 @@ def get_invoice(invoice_id: uuid.UUID, as_at: date | None = None, ctx: OrgContex
         **(row or {}), "reporting_date": r.isoformat(), "reference": inv.reference, "tax_amount": fmt(inv.tax_amount, inv.currency),
         "net_amount": fmt(inv.net_amount, inv.currency), "total_is_derived": inv.total_is_derived,
         "stored_status": inv.status, "status_reason": inv.status_reason, "version": inv.version,
+        "entry_method": inv.entry_method,
         "source_row_id": str(inv.source_row_id) if inv.source_row_id else None,
         "allocations": [allocation_out(a, inv.currency) for a in allocs],
         "versions": [{"version": v.version, "values": v.values, "reason": v.change_reason,

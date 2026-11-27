@@ -30,6 +30,7 @@ MATRIX = {
     "create_customer": {"owner", "admin", "finance_manager", "ar_officer"},
     "upload_import": {"owner", "admin", "finance_manager", "ar_officer"},
     "record_payment": {"owner", "admin", "finance_manager", "ar_officer"},
+    "manual_invoice": {"owner", "admin", "finance_manager", "ar_officer"},
     "confirm_allocation": {"owner", "admin", "finance_manager", "ar_officer"},
     "credit_note": {"owner", "admin", "finance_manager"},
     "invoice_status": {"owner", "admin", "finance_manager"},
@@ -52,6 +53,10 @@ def _do(action, api, org, cust, inv, pay, n):
     if action == "record_payment":
         return api.post(f"{base}/payments", json={"customer_id": cust["id"], "payment_date": "2026-02-02",
                                                    "amount": "1.00", "reference": f"perm-{n}"})
+    if action == "manual_invoice":
+        return api.post(f"{base}/invoices", json={"customer_id": cust["id"], "invoice_number": f"MAN-{n}",
+                                                   "issue_date": "2026-01-01", "due_date": "2026-01-31",
+                                                   "total_amount": "5.00"})
     if action == "confirm_allocation":
         return api.post(f"{base}/allocations", json={"invoice_id": inv["id"], "payment_id": pay["id"], "amount": "1.00"})
     if action == "credit_note":

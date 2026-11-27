@@ -51,6 +51,7 @@ def invoice_values(inv: Invoice) -> dict:
         "source_amount_due": fmt(inv.source_amount_due, c),
         "reference": inv.reference,
         "status": inv.status,
+        "entry_method": inv.entry_method,
     }
 
 
@@ -263,3 +264,60 @@ def reverse_allocation(db: Session, org: Organisation, actor_id: uuid.UUID, allo
                  entity_type="allocation", entity_id=a.id, before={"status": "confirmed"},
                  after={"status": "reversed", "reason": reason.strip(), "amount": fmt(a.amount, org.currency)})
     return a
+
+
+def create_invoice_manual(db: Session, org: Organisation, actor_id: uuid.UUID, *, customer_id: uuid.UUID,
+                          invoice_number: str, issue_date: date, due_date: date, total_amount: str | None,
+                          net_amount: str | None, tax_amount: str | None, reference: str | None,
+                          confirm_duplicate_number: bool = False) -> Invoice:
+    """Manual entry under the same rules as import (rules.md §8.12)."""
+    from app.models import Customer
+
+    if db.scalar(select(Customer.id).where(Customer.id == customer_id, Customer.organisation_id == org.id)) is None:
+        raise NotFound("Customer not found")
+    if not invoice_number or not invoice_number.strip():
+        raise ValidationFailed("Invoice number is required", details={"field": "invoice_number"})
+    if due_date < issue_date:
+        raise ValidationFailed("Due date is before the issue date", details={"field": "due_date"})
+
+    def money(value: str | None, field: str) -> Decimal | None:
+        if value is None or not str(value).strip():
+            return None
+        try:
+            return parse_amount(value, org.currency, allow_negative=True)
+        except MoneyError as exc:
+            raise ValidationFailed(str(exc), code="invalid_amount", details={"field": field}) from exc
+
+    total, net, tax = money(total_amount, "total_amount"), money(net_amount, "net_amount"), money(tax_amount, "tax_amount")
+    derived = False
+    if total is None:
+        if net is None or tax is None:
+            raise ValidationFailed("Enter the total amount, or both net and tax amounts", code="invalid_amount",
+                                   details={"field": "total_amount"})
+        total, derived = net + tax, True
+    elif net is not None and tax is not None and net + tax != total:
+        raise ValidationFailed("Total does not equal net + tax", code="invalid_amount", details={"field": "total_amount"})
+    if total < ZERO:
+        raise ValidationFailed("Invoice total cannot be negative; record a credit note instead", code="invalid_amount",
+                               details={"field": "total_amount"})
+
+    norm = normalise_number(invoice_number)
+    if db.scalar(select(Invoice.id).where(Invoice.organisation_id == org.id, Invoice.customer_id == customer_id,
+                                          Invoice.normalised_number == norm)):
+        raise Conflict("This customer already has an invoice with this number", code="duplicate_invoice")
+    if not confirm_duplicate_number and db.scalar(select(Invoice.id).where(Invoice.organisation_id == org.id,
+                                                                            Invoice.normalised_number == norm)):
+        raise Conflict("Another customer has an invoice with this number. Confirm if this is a separate invoice.",
+                       code="invoice_number_used_elsewhere")
+
+    inv = Invoice(organisation_id=org.id, customer_id=customer_id, invoice_number=invoice_number.strip(),
+                  normalised_number=norm, issue_date=issue_date, due_date=due_date, currency=org.currency,
+                  total_amount=total, net_amount=net, tax_amount=tax, total_is_derived=derived,
+                  reference=(reference or "").strip() or None, status="open", version=1, entry_method="manual",
+                  created_by=actor_id)
+    db.add(inv)
+    db.flush()
+    record_version(db, inv, "entered manually", actor_id)
+    audit.record(db, action="invoice.created_manual", actor_user_id=actor_id, organisation_id=org.id,
+                 entity_type="invoice", entity_id=inv.id, after=invoice_values(inv), source="manual")
+    return inv
