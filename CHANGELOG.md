@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+### Added
+- Engineering principles and tool responsibilities (`docs/00-project/engineering-principles.md`), referenced from `CLAUDE.md`, `AGENTS.md` and `README.md`.
+- Pull request template enforcing the five principles and author ≠ reviewer.
+
 ## 0.1.0 — 2026-11-27 (Release 1 build, not deployed)
 
 ### Added

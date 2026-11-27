@@ -1,5 +1,16 @@
 # Claude Code project instructions
 
+## Non-negotiable principles (read first)
+Full text and tool responsibilities: `docs/00-project/engineering-principles.md`.
+1. Documentation before implementation.
+2. Financial rules before financial features.
+3. Database and tenant security before customer data.
+4. Automated tests before declaring completion.
+5. Human approval before production deployment.
+
+## Your role
+Claude Code is the primary implementer and code reviewer. Work on a branch, open a pull request with the completion report below, and leave the independent review to Codex. Never deploy.
+
 ## Product context
 Build Vittasynx, a multi-tenant SaaS for B2B wholesalers and distributors. Release 1 provides receivables intelligence. A transparent 13-week cash forecast follows in Release 2, only after the receivables module passes Phase 6 testing (see `docs/00-project/scope.md` and `docs/00-project/master-build-instruction.md`). This is financial operations software, not accounting software.
 

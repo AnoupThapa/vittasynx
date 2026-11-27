@@ -28,6 +28,9 @@ A phase is never marked COMPLETED merely because its documents exist.
 - Phase 4 foundation and Phase 5 receivables modules built (FastAPI + PostgreSQL RLS backend, Next.js frontend).
 - Tests: 151 backend tests passed; frontend type check and 3 unit tests passed; production build succeeded; end-to-end browser test passed 11/11 checks.
 
+### 2026-11-27 (later)
+- Owner established five non-negotiable principles and tool responsibilities; recorded in `docs/00-project/engineering-principles.md` and wired into `CLAUDE.md`, `AGENTS.md`, `README.md` and a pull request template.
+
 ## Open items carried forward
 - Owner decisions: hosting providers and region, email provider, budget, RPO/RTO (ADR-008); confirm synchronous imports (ADR-004).
 - Before staging: rate limiting, MFA recovery codes, S3-compatible storage adapter, email provider adapter, split DB roles, external security review.
