@@ -10,6 +10,7 @@ export default function Security() {
   const [setup, setSetup] = useState<{ secret: string; otpauth_uri: string } | null>(null);
   const [code, setCode] = useState("");
   const [enabled, setEnabled] = useState(false);
+  const [codes, setCodes] = useState<string[] | null>(null);
   const { busy, error, run } = useAction();
 
   if (!me.data) return <Loading />;
@@ -18,7 +19,15 @@ export default function Security() {
     <AuthCard title="Two-factor authentication">
       <ErrorNotice error={error} />
       {already ? (
-        <Notice kind="ok">Two-factor authentication is on for {me.data.user.email}.</Notice>
+        <>
+          <Notice kind="ok">Two-factor authentication is on for {me.data.user.email}.</Notice>
+          {codes && (
+            <>
+              <Notice kind="warn">Save these recovery codes now (print them or keep them in a password manager). Each works once if you lose your phone. They won't be shown again.</Notice>
+              <pre className="mono" style={{ background: "var(--bg)", padding: 12, borderRadius: 6, columns: 2 }}>{codes.join("\n")}</pre>
+            </>
+          )}
+        </>
       ) : !setup ? (
         <>
           <p className="muted">Protect your account with an authenticator app (Google Authenticator, Microsoft Authenticator, 1Password and similar).
@@ -26,7 +35,7 @@ export default function Security() {
           <button className="primary" disabled={busy} onClick={async () => { const r = await run(() => apiSend("POST", "/auth/mfa/setup")); if (r) setSetup(r); }}>Start setup</button>
         </>
       ) : (
-        <form onSubmit={async (e) => { e.preventDefault(); if (await run(() => apiSend("POST", "/auth/mfa/enable", { code }))) setEnabled(true); }}>
+        <form onSubmit={async (e) => { e.preventDefault(); const r = await run(() => apiSend("POST", "/auth/mfa/enable", { code })); if (r) { setEnabled(true); setCodes(r.recovery_codes); } }}>
           <p>1. In your authenticator app, add an account using this setup key:</p>
           <p className="mono" style={{ wordBreak: "break-all", background: "var(--bg)", padding: 8, borderRadius: 6 }}>{setup.secret}</p>
           <p className="small"><a href={setup.otpauth_uri}>Open in an authenticator app on this device</a></p>

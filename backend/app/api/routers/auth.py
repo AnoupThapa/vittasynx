@@ -9,6 +9,7 @@ from app.core.permissions import ROLE_LABELS
 from app.db import get_db
 from app.models import User, UserSession
 from app.services import identity, organisations
+from app.services.ratelimit import client_ip, hashed, hit
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -38,7 +39,7 @@ class ResetIn(BaseModel):
 
 
 class CodeIn(BaseModel):
-    code: str = Field(min_length=6, max_length=8)
+    code: str = Field(min_length=6, max_length=12)  # 6-digit TOTP or a recovery code like abcde-fghjk
 
 
 def user_out(user: User) -> dict:
@@ -68,14 +69,19 @@ def _clear_cookies(response: Response) -> None:
 
 
 @router.post("/register", status_code=201)
-def register(body: RegisterIn, db: Session = Depends(get_db)) -> dict:
+def register(body: RegisterIn, request: Request, db: Session = Depends(get_db)) -> dict:
+    s = get_settings()
+    hit(db, f"register:ip:{client_ip(request)}", s.register_limit_per_ip, 3600)
     user = identity.register(db, body.email, body.full_name, body.password)
     db.commit()
     return {"user": user_out(user), "message": "Account created. Check your email to verify your address."}
 
 
 @router.post("/login")
-def login(body: LoginIn, response: Response, db: Session = Depends(get_db)) -> dict:
+def login(body: LoginIn, request: Request, response: Response, db: Session = Depends(get_db)) -> dict:
+    s = get_settings()
+    hit(db, f"login:ip:{client_ip(request)}", s.login_limit_per_ip, 900)
+    hit(db, f"login:acct:{hashed(body.email)}", s.login_limit_per_account, 900)
     result = identity.login(db, body.email, body.password)
     db.commit()
     _set_cookies(response, result.token, result.session.csrf_token)
@@ -84,6 +90,7 @@ def login(body: LoginIn, response: Response, db: Session = Depends(get_db)) -> d
 
 @router.post("/mfa/verify")
 def mfa_verify(body: CodeIn, session: UserSession = Depends(pending_session), db: Session = Depends(get_db)) -> dict:
+    hit(db, f"mfa:session:{session.id}", get_settings().mfa_limit_per_session, 900)
     identity.mfa_verify(db, session, body.code)
     db.commit()
     return {"user": user_out(session.user), "mfa_required": False}
@@ -132,7 +139,10 @@ def resend_verification(user: User = Depends(current_user), db: Session = Depend
 
 
 @router.post("/password-reset/request")
-def password_reset_request(body: ResetRequestIn, db: Session = Depends(get_db)) -> dict:
+def password_reset_request(body: ResetRequestIn, request: Request, db: Session = Depends(get_db)) -> dict:
+    s = get_settings()
+    hit(db, f"reset:ip:{client_ip(request)}", s.reset_limit_per_ip, 3600)
+    hit(db, f"reset:acct:{hashed(body.email)}", s.reset_limit_per_account, 3600)
     identity.request_password_reset(db, body.email)
     db.commit()
     return {"message": "If an account exists for that email, a reset link has been sent."}
@@ -154,9 +164,28 @@ def mfa_setup(user: User = Depends(current_user), db: Session = Depends(get_db))
 
 @router.post("/mfa/enable")
 def mfa_enable(body: CodeIn, session: UserSession = Depends(current_session), db: Session = Depends(get_db)) -> dict:
-    identity.mfa_enable(db, session.user, session, body.code)
+    codes = identity.mfa_enable(db, session.user, session, body.code)
     db.commit()
-    return {"user": user_out(session.user)}
+    return {"user": user_out(session.user), "recovery_codes": codes,
+            "message": "Save these recovery codes somewhere safe. Each works once; they will not be shown again."}
+
+
+@router.get("/mfa/recovery-codes")
+def recovery_status(user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict:
+    return {"remaining": identity.remaining_recovery_codes(db, user)}
+
+
+@router.post("/mfa/recovery-codes")
+def regenerate_recovery_codes(body: CodeIn, session: UserSession = Depends(current_session), db: Session = Depends(get_db)) -> dict:
+    """Requires a current authenticator code, so a stolen session alone cannot mint new codes."""
+    user = session.user
+    if not user.mfa_enabled or not identity._check_code(user, body.code):
+        from app.core.errors import ValidationFailed
+
+        raise ValidationFailed("Enter a current code from your authenticator app", code="invalid_mfa_code")
+    codes = identity.issue_recovery_codes(db, user)
+    db.commit()
+    return {"recovery_codes": codes}
 
 
 @router.get("/dev/outbox")

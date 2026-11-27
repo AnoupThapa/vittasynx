@@ -18,12 +18,12 @@ function MfaForm() {
   }
   return (
     <AuthCard title="Two-factor authentication">
-      <p className="muted">Enter the 6-digit code from your authenticator app.</p>
+      <p className="muted">Enter the 6-digit code from your authenticator app, or one of your recovery codes if you've lost your phone.</p>
       <ErrorNotice error={error} />
       <form onSubmit={submit}>
         <div className="field"><label htmlFor="code">Code</label>
-          <input id="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required
-            value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} /></div>
+          <input id="code" autoComplete="one-time-code" maxLength={12} required
+            value={code} onChange={(e) => setCode(e.target.value.trim())} /></div>
         <button className="primary" disabled={busy} style={{ width: "100%", justifyContent: "center" }}>Verify</button>
       </form>
     </AuthCard>

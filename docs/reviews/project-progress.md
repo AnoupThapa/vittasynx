@@ -10,9 +10,9 @@ A phase is never marked COMPLETED merely because its documents exist.
 |---|---|---|---|---|
 | 1 | Document review and product confirmation | **APPROVED** | Approved by owner 2026-11-27 (`phase-1-approval.md`) | 2026-11-27 |
 | 2 | Business validation | **BLOCKED (awaiting external validation)** | Materials ready. No interviews done, no sample data received. Owner chose to build in parallel. | 2026-11-27 |
-| 3 | Finalise technical architecture | **AWAITING APPROVAL** | Architecture documented as built. Provider selection, region, budget and RPO/RTO need an owner decision (ADR-008); ADR-004 (synchronous imports) needs confirmation. | 2026-11-27 |
-| 4 | Application foundation | **AWAITING APPROVAL** | All automated gate checks pass (`phase-4-foundation-test-report.md`). Owner review outstanding. | 2026-11-27 |
-| 5 | Invoice imports and receivables intelligence | **AWAITING APPROVAL** | Built; 151 backend tests and an 11-check browser test pass on synthetic data (`phase-5-receivables-test-report.md`). | 2026-11-27 |
+| 3 | Finalise technical architecture | **APPROVED** | Approved 2026-11-27. Hosting: free tiers for testing; paid provider chosen after completion and testing. | 2026-11-27 |
+| 4 | Application foundation | **APPROVED** | Approved 2026-11-27 (`phase-4-foundation-test-report.md`); hardening added (`pre-launch-hardening-report.md`). | 2026-11-27 |
+| 5 | Invoice imports and receivables intelligence | **APPROVED** | Approved 2026-11-27. Manual invoice entry and demo data requested as follow-ups. | 2026-11-27 |
 | 6 | Real business workflow testing | NOT STARTED | Needs anonymised real data from Phase 2 | — |
 | — | 13-week cash-flow forecasting (Release 2) | NOT STARTED | Only after Phase 6 approval | — |
 
@@ -30,6 +30,10 @@ A phase is never marked COMPLETED merely because its documents exist.
 
 ### 2026-11-27 (later)
 - Owner established five non-negotiable principles and tool responsibilities; recorded in `docs/00-project/engineering-principles.md` and wired into `CLAUDE.md`, `AGENTS.md`, `README.md` and a pull request template.
+
+### 2026-11-27 (handoff after Phase 5)
+- Owner approved Phases 3–5 and the hardening work; chose **free hosting until completion and testing**, paid hosting afterwards; approved CI and branch protection; asked for dummy data now and manual data entry for real use.
+- CI pipeline added (PR #2). Hardening delivered (PR #3): 161 tests pass; E2E passes running as the restricted database role.
 
 ## Open items carried forward
 - Owner decisions: hosting providers and region, email provider, budget, RPO/RTO (ADR-008); confirm synchronous imports (ADR-004).

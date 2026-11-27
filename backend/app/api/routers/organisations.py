@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 
@@ -8,7 +8,9 @@ from app.api.deps import OrgContext, current_user, require
 from app.core.permissions import ROLE_LABELS, Perm
 from app.db import get_db
 from app.models import Membership, Organisation, User
+from app.config import get_settings
 from app.services import organisations as svc
+from app.services.ratelimit import client_ip, hit
 
 router = APIRouter(tags=["organisations"])
 
@@ -126,7 +128,8 @@ def revoke(invitation_id: uuid.UUID, ctx: OrgContext = Depends(require(Perm.MANA
 
 
 @router.post("/invitations/accept")
-def accept(body: AcceptIn, user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict:
+def accept(body: AcceptIn, request: Request, user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict:
+    hit(db, f"accept:ip:{client_ip(request)}", get_settings().accept_invite_limit_per_ip, 3600)
     m = svc.accept_invitation(db, user, body.token)
     db.commit()
     return org_out(m.organisation, m.role)

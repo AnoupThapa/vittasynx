@@ -18,7 +18,11 @@ from app.core.security import (
     validate_password,
     verify_password,
 )
-from app.models import User, UserSession, UserToken
+import secrets
+
+from sqlalchemy import delete
+
+from app.models import MfaRecoveryCode, User, UserSession, UserToken
 from app.services import audit
 from app.services.email import send_email
 
@@ -185,7 +189,46 @@ def _check_code(user: User, code: str) -> bool:
     return bool(user.mfa_secret) and pyotp.TOTP(user.mfa_secret).verify(code.strip(), valid_window=1)
 
 
-def mfa_enable(db: Session, user: User, session: UserSession, code: str) -> None:
+RECOVERY_CODE_COUNT = 10
+_RECOVERY_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789"  # no look-alike characters
+
+
+def _normalise_recovery(code: str) -> str:
+    return code.strip().lower().replace("-", "").replace(" ", "")
+
+
+def issue_recovery_codes(db: Session, user: User) -> list[str]:
+    """Replace all recovery codes. The plain codes are returned once and never stored."""
+    db.execute(delete(MfaRecoveryCode).where(MfaRecoveryCode.user_id == user.id))
+    codes = []
+    for _ in range(RECOVERY_CODE_COUNT):
+        raw = "".join(secrets.choice(_RECOVERY_ALPHABET) for _ in range(10))
+        codes.append(f"{raw[:5]}-{raw[5:]}")
+        db.add(MfaRecoveryCode(user_id=user.id, code_hash=hash_token(raw)))
+    audit.record(db, action="user.mfa_recovery_codes_issued", actor_user_id=user.id, entity_type="user", entity_id=user.id)
+    return codes
+
+
+def _use_recovery_code(db: Session, user: User, code: str) -> bool:
+    norm = _normalise_recovery(code)
+    if len(norm) != 10:
+        return False
+    row = db.scalar(select(MfaRecoveryCode).where(MfaRecoveryCode.user_id == user.id,
+                                                  MfaRecoveryCode.code_hash == hash_token(norm),
+                                                  MfaRecoveryCode.used_at.is_(None)).with_for_update())
+    if row is None:
+        return False
+    row.used_at = _now()
+    audit.record(db, action="user.mfa_recovery_code_used", actor_user_id=user.id, entity_type="user", entity_id=user.id)
+    return True
+
+
+def remaining_recovery_codes(db: Session, user: User) -> int:
+    return len(db.scalars(select(MfaRecoveryCode.id).where(MfaRecoveryCode.user_id == user.id,
+                                                           MfaRecoveryCode.used_at.is_(None))).all())
+
+
+def mfa_enable(db: Session, user: User, session: UserSession, code: str) -> list[str]:
     if user.mfa_enabled:
         raise Conflict("MFA is already enabled", code="mfa_already_enabled")
     if not _check_code(user, code):
@@ -193,11 +236,13 @@ def mfa_enable(db: Session, user: User, session: UserSession, code: str) -> None
     user.mfa_enabled = True
     session.mfa_verified = True
     audit.record(db, action="user.mfa_enabled", actor_user_id=user.id, entity_type="user", entity_id=user.id)
+    return issue_recovery_codes(db, user)
 
 
 def mfa_verify(db: Session, session: UserSession, code: str) -> None:
+    """Accepts a 6-digit authenticator code or a single-use recovery code."""
     user = session.user
-    if not _check_code(user, code):
+    if not (_check_code(user, code) or _use_recovery_code(db, user, code)):
         audit.record(db, action="user.mfa_failed", actor_user_id=user.id, entity_type="user", entity_id=user.id)
         db.commit()
         raise Unauthorised("The code is incorrect", code="invalid_mfa_code")

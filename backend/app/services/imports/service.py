@@ -38,7 +38,7 @@ def upload(db: Session, org: Organisation, actor_id: uuid.UUID, kind: str, filen
     if kind not in FIELDS:
         raise ValidationFailed(f"Unknown import type '{kind}'", code="invalid_kind")
     parsed = parse(filename, data)  # validates type/size/structure before anything is stored
-    key, sha = get_storage().put(org.id, data)
+    key, sha = get_storage(db).put(org.id, data)
     f = StoredFile(organisation_id=org.id, original_filename=filename[:300], content_type=parsed.content_type,
                    size_bytes=len(data), sha256=sha, storage_key=key, created_by=actor_id)
     db.add(f)
@@ -631,7 +631,7 @@ def file_for(db: Session, org_id: uuid.UUID, batch: ImportBatch) -> tuple[Stored
     f = db.scalar(select(StoredFile).where(StoredFile.id == batch.file_id, StoredFile.organisation_id == org_id))
     if f is None:
         raise NotFound("File not found")
-    return f, get_storage().get(f.storage_key)
+    return f, get_storage(db).get(f.storage_key)
 
 
 __all__ = ["upload", "configure_and_validate", "update_row", "commit", "cancel", "review_amendment",

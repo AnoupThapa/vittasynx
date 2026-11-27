@@ -19,3 +19,13 @@ Validate extension, MIME type, size and file structure. Treat uploaded files as 
 
 ## Incident readiness
 Define incident classification, escalation, containment, evidence preservation, customer communication and recovery procedures before production launch.
+
+## Implemented controls (Release 1 + pre-launch hardening, 2026-11-27)
+| Control | Implementation |
+|---|---|
+| Rate limiting | PostgreSQL-backed fixed windows (shared across instances): login 30/15 min per IP and 10/15 min per account; registration 10/h per IP; password reset 10/h per IP and 3/h per account; MFA verification 10/15 min per session; invitation acceptance 20/h per IP. `X-Forwarded-For` is trusted only when `VX_TRUST_FORWARDED_FOR=true` (set it only behind your own proxy). Emails in limiter keys are hashed. |
+| Account lockout | 10 failed logins → 15-minute lock |
+| MFA | TOTP; required for Owner/Admin. Ten single-use recovery codes issued on enrolment (stored as hashes); regenerating them requires a current authenticator code. |
+| Email | `smtp` adapter (any provider) or development outbox. The outbox is refused in staging/production; message bodies (which contain tokens) are never logged. |
+| File storage | `local` private directory or `database` (RLS-protected `file_blobs`) for hosts without persistent disk. |
+| Database roles | `deploy/sql/roles.sql`: separate migration owner and restricted runtime role (no superuser, no BYPASSRLS, no DELETE on financial history). Verified: full end-to-end test passes running as the restricted role. |
