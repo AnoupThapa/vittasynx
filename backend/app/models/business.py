@@ -10,6 +10,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    LargeBinary,
     String,
     Text,
     UniqueConstraint,
@@ -44,6 +45,14 @@ class StoredFile(IdMixin, CreatedMixin, TenantMixin, Base):
     sha256: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     storage_key: Mapped[str] = mapped_column(String(300), nullable=False, unique=True)
     created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
+
+
+class FileBlob(TenantMixin, Base):
+    """File contents for the 'database' storage backend (free-tier hosting without object storage)."""
+
+    __tablename__ = "file_blobs"
+    storage_key: Mapped[str] = mapped_column(String(300), primary_key=True)
+    data: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
 
 
 IMPORT_KINDS = ("invoices", "credit_notes", "payments", "bank")
@@ -234,4 +243,5 @@ TENANT_TABLES = (
     "credit_notes",
     "payments",
     "allocations",
+    "file_blobs",
 )

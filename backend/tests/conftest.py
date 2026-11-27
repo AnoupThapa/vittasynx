@@ -10,6 +10,7 @@ os.environ["VX_DATABASE_URL"] = os.environ.get(
     "VX_TEST_DATABASE_URL", "postgresql+psycopg://vittasynx:devpassword@localhost:5432/vittasynx_test"
 )
 os.environ["VX_REQUIRE_MFA_FOR_PRIVILEGED"] = "false"
+os.environ["VX_RATE_LIMIT_ENABLED"] = "false"  # enabled explicitly in test_hardening.py
 os.environ["VX_FILE_STORAGE_DIR"] = tempfile.mkdtemp(prefix="vx-files-")
 
 import io  # noqa: E402

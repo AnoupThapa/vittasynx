@@ -23,6 +23,17 @@ class Settings(BaseSettings):
     max_failed_logins: int = 10
     lockout_minutes: int = 15
 
+    # Rate limiting (per IP and per account). Behind a trusted proxy set trust_forwarded_for=true.
+    rate_limit_enabled: bool = True
+    trust_forwarded_for: bool = False
+    login_limit_per_ip: int = 30          # per 15 minutes
+    login_limit_per_account: int = 10     # per 15 minutes
+    register_limit_per_ip: int = 10       # per hour
+    reset_limit_per_ip: int = 10          # per hour
+    reset_limit_per_account: int = 3      # per hour
+    mfa_limit_per_session: int = 10       # per 15 minutes
+    accept_invite_limit_per_ip: int = 20  # per hour
+
     # MFA (decision D-18)
     require_mfa_for_privileged: bool = True
 
@@ -32,8 +43,17 @@ class Settings(BaseSettings):
     max_import_rows: int = 20_000
     max_xlsx_uncompressed_bytes: int = 50 * 1024 * 1024
 
-    # Email: "dev_outbox" stores messages in the database for local development only.
+    # Email: "dev_outbox" stores messages in the database (local development only); "smtp" sends them.
     email_backend: str = "dev_outbox"
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_starttls: bool = True
+    email_from: str = "Vittasynx <no-reply@localhost>"
+
+    # File storage: "local" (private directory) or "database" (PostgreSQL, for hosts without persistent disk).
+    storage_backend: str = "local"
     app_base_url: str = "http://localhost:3000"
 
     # CORS: the frontend proxies /api, so normally empty.
@@ -54,6 +74,8 @@ class Settings(BaseSettings):
                 raise RuntimeError("VX_COOKIE_SECURE must be true in staging/production")
             if self.email_backend == "dev_outbox":
                 raise RuntimeError("dev_outbox email backend is not allowed in staging/production")
+            if self.email_backend == "smtp" and not self.smtp_host:
+                raise RuntimeError("VX_SMTP_HOST is required when VX_EMAIL_BACKEND=smtp")
             if "devpassword" in self.database_url:
                 raise RuntimeError("Development database credentials are not allowed in staging/production")
 

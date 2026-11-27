@@ -87,3 +87,21 @@ class EmailOutbox(IdMixin, CreatedMixin, Base):
     to_address: Mapped[str] = mapped_column(String(320), nullable=False)
     subject: Mapped[str] = mapped_column(String(300), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class MfaRecoveryCode(IdMixin, CreatedMixin, Base):
+    """Single-use backup codes for two-factor login. Only hashes are stored."""
+
+    __tablename__ = "mfa_recovery_codes"
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    code_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(nullable=True)
+
+
+class RateLimitHit(Base):
+    """Fixed-window request counters shared by all app instances (stored in PostgreSQL)."""
+
+    __tablename__ = "rate_limit_hits"
+    key: Mapped[str] = mapped_column(String(200), primary_key=True)
+    window_start: Mapped[datetime] = mapped_column(primary_key=True)
+    count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
