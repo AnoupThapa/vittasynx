@@ -22,6 +22,15 @@ Release 2 (not started): suppliers, opening cash, rolling 13-week cash forecast 
 
 Not in the MVP: general ledger, tax filing, payroll, payment execution, inventory management, lending, credit bureau services, autonomous financial decisions or cross-company credit scoring.
 
+## Non-negotiable principles
+1. Documentation before implementation.
+2. Financial rules before financial features.
+3. Database and tenant security before customer data.
+4. Automated tests before declaring completion.
+5. Human approval before production deployment.
+
+Details and tool responsibilities (Claude Code, Codex, GitHub, PostgreSQL, Python, Playwright): `docs/00-project/engineering-principles.md`.
+
 ## Documentation
 Read `CLAUDE.md` or `AGENTS.md` first, then:
 1. `docs/00-project/vision.md`
