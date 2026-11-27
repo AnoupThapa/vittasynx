@@ -56,3 +56,9 @@ Nothing is deployed to staging or production, and no production data is changed,
 6. **Release.** Deployment only with the owner's explicit approval for that release (principle 5).
 
 The author and the reviewer must be different: the tool that wrote a change never gives its final review.
+
+## Phase handoff rule (owner instruction, 2026-11-27)
+At the end of every phase, the agent asks the owner one question: **"What do I need from you?"**, with a specific list.
+- **If the list is empty**, the agent continues to the next phase without waiting.
+- **If the list has items**, the agent asks for exactly those and continues with any work that doesn't depend on them.
+- Items that always need the owner: approval gates in the master build instruction, changes to financial rules, provider or spending choices, real data, and any deployment (principle 5). Silence is still not approval for these.

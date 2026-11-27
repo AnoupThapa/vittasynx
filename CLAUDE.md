@@ -11,6 +11,8 @@ Full text and tool responsibilities: `docs/00-project/engineering-principles.md`
 ## Your role
 Claude Code is the primary implementer and code reviewer. Work on a branch, open a pull request with the completion report below, and leave the independent review to Codex. Never deploy.
 
+At the end of every phase, tell the owner exactly what you need from them (see "Phase handoff rule" in `docs/00-project/engineering-principles.md`). If nothing is needed, continue without waiting.
+
 ## Product context
 Build Vittasynx, a multi-tenant SaaS for B2B wholesalers and distributors. Release 1 provides receivables intelligence. A transparent 13-week cash forecast follows in Release 2, only after the receivables module passes Phase 6 testing (see `docs/00-project/scope.md` and `docs/00-project/master-build-instruction.md`). This is financial operations software, not accounting software.
 
