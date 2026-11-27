@@ -34,6 +34,7 @@ A phase is never marked COMPLETED merely because its documents exist.
 ### 2026-11-27 (handoff after Phase 5)
 - Owner approved Phases 3–5 and the hardening work; chose **free hosting until completion and testing**, paid hosting afterwards; approved CI and branch protection; asked for dummy data now and manual data entry for real use.
 - CI pipeline added (PR #2). Hardening delivered (PR #3): 161 tests pass; E2E passes running as the restricted database role.
+- Manual invoice entry (PR #4) and demo organisation (PR #5) built; 177 backend tests and 13/13 E2E checks pass.
 
 ## Open items carried forward
 - Owner decisions: hosting providers and region, email provider, budget, RPO/RTO (ADR-008); confirm synchronous imports (ADR-004).

@@ -74,15 +74,17 @@ def require(perm: Perm) -> Callable[..., OrgContext]:
         )
         if membership is None:
             raise NotFound("Organisation not found")
-        if get_settings().require_mfa_for_privileged and membership.role in PRIVILEGED_ROLES and not user.mfa_enabled:
+        org = db.get(Organisation, org_id)
+        assert org is not None
+        # Demo organisations hold only synthetic data, so two-factor enforcement is not applied (rules.md §8.13).
+        if (get_settings().require_mfa_for_privileged and membership.role in PRIVILEGED_ROLES
+                and not user.mfa_enabled and not org.is_demo):
             raise Forbidden(
                 "Owners and Administrators must enable two-factor authentication first",
                 code="mfa_enrolment_required",
             )
         if not has_permission(membership.role, perm):
             raise Forbidden("Your role does not allow this action", code="permission_denied")
-        org = db.get(Organisation, org_id)
-        assert org is not None
         set_tenant(db, org.id)
         return OrgContext(org=org, membership=membership, user=user, db=db)
 

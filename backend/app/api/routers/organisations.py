@@ -45,7 +45,7 @@ class TransferIn(BaseModel):
 
 def org_out(org: Organisation, role: str | None = None) -> dict:
     out = {"id": str(org.id), "name": org.name, "currency": org.currency, "timezone": org.timezone,
-           "created_at": org.created_at.isoformat()}
+           "is_demo": org.is_demo, "created_at": org.created_at.isoformat()}
     if role:
         out["role"] = role
         out["role_label"] = ROLE_LABELS[role]
@@ -60,6 +60,21 @@ def member_out(m: Membership) -> dict:
 @router.post("/orgs", status_code=201)
 def create_org(body: OrgIn, user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict:
     org = svc.create_organisation(db, user, body.name, body.currency, body.timezone)
+    db.commit()
+    return org_out(org, "owner")
+
+
+class DemoIn(BaseModel):
+    currency: str = Field(default="AUD", min_length=3, max_length=3)
+    timezone: str = Field(default="Australia/Sydney", max_length=64)
+
+
+@router.post("/orgs/demo", status_code=201)
+def create_demo(body: DemoIn, user: User = Depends(current_user), db: Session = Depends(get_db)) -> dict:
+    """Creates (or returns) the caller's demo organisation with synthetic data (rules.md §8.13)."""
+    from app.services import demo
+
+    org = demo.create_demo_organisation(db, user, body.currency, body.timezone)
     db.commit()
     return org_out(org, "owner")
 

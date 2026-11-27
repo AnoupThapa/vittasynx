@@ -49,9 +49,13 @@ class UserToken(IdMixin, CreatedMixin, Base):
 
 class Organisation(IdMixin, CreatedMixin, Base):
     __tablename__ = "organisations"
+    __table_args__ = (UniqueConstraint("demo_owner_id", name="uq_organisations_demo_owner"),)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False)  # fixed at creation (D-07)
     timezone: Mapped[str] = mapped_column(String(64), nullable=False)  # IANA (D-16)
+    is_demo: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false", nullable=False)
+    demo_owner_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", name="fk_organisations_demo_owner"),
+                                                            nullable=True)
 
 
 class Membership(IdMixin, CreatedMixin, Base):

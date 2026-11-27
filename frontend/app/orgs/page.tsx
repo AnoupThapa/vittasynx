@@ -24,10 +24,17 @@ export default function Orgs() {
           {orgs.map((o) => (
             <div key={o.id} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--line)" }}>
               <Link href={`/o/${o.id}/dashboard`}><strong>{o.name}</strong></Link>
-              <span className="muted small">{o.role_label} · {o.currency}</span>
+              <span className="muted small">{o.is_demo ? "Demo · synthetic data" : `${o.role_label} · ${o.currency}`}</span>
             </div>
           ))}
           <h3 style={{ marginTop: 20 }}>Create another organisation</h3>
+        </div>
+      )}
+      {!orgs.some((o) => o.is_demo) && (
+        <div className="notice info" style={{ marginBottom: 16 }}>
+          Want to look around first?{" "}
+          <button className="link" disabled={busy} onClick={async () => { const o = await run(() => apiSend("POST", "/orgs/demo", {})); if (o) router.push(`/o/${o.id}/dashboard`); }}>
+            Open a demo organisation with sample data</button>. It is kept separate from your real data.
         </div>
       )}
       <ErrorNotice error={error} />

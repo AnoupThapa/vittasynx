@@ -50,7 +50,7 @@ export default function OrgLayout({ children }: { children: ReactNode }) {
     return <div className="main"><Notice kind="error">Organisation not found or you are not a member.</Notice>
       <Link href="/orgs">Choose an organisation</Link></div>;
   }
-  const needsMfa = me.mfa_required_for_privileged && ["owner", "admin"].includes(org.role) && !me.user.mfa_enabled;
+  const needsMfa = me.mfa_required_for_privileged && ["owner", "admin"].includes(org.role) && !me.user.mfa_enabled && !org.is_demo;
 
   async function logout() {
     await apiSend("POST", "/auth/logout").catch(() => undefined);
@@ -90,6 +90,12 @@ export default function OrgLayout({ children }: { children: ReactNode }) {
           </div>
         </aside>
         <main className="main">
+          {org.is_demo && (
+            <div className="notice warn" role="status">
+              <strong>Demo organisation: synthetic data.</strong> Everything here is made up so you can explore Vittasynx.
+              Real customers and invoices go in a separate organisation (<Link href="/orgs">create one</Link>).
+            </div>
+          )}
           {needsMfa ? (
             <Notice kind="warn">
               Owners and Administrators must turn on two-factor authentication before working with financial data.{" "}

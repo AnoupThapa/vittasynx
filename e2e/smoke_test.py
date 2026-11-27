@@ -174,6 +174,19 @@ def main() -> int:
         page.fill("#as-at", "2026-03-31")
         expect(page.locator("tr", has_text="MAN-2001")).to_contain_text("220.00")
         ok("manual invoice MAN-2001 entered; total 220.00 derived from net + tax")
+
+        # 11. Demo organisation with synthetic data, separate from the real one (rules.md §8.13)
+        page.goto(f"{BASE}/orgs")
+        page.click("text=Open a demo organisation with sample data")
+        page.wait_for_url(re.compile(r".*/o/[0-9a-f-]+/dashboard"))
+        assert page.url.rsplit("/", 1)[0] != org_url
+        expect(page.get_by_text("Demo organisation: synthetic data.")).to_be_visible()
+        expect(page.locator("tfoot tr").first).to_be_visible()  # wait for real figures
+        expect(page.locator(".figure").first).not_to_contain_text("0.00 0 open")
+        expect(page.locator(".figure", has_text="Overdue")).to_contain_text("invoices past due")
+        expect(page.get_by_text("Ageing buckets do not reconcile")).to_have_count(0)
+        shot("11-demo-dashboard")
+        ok("demo organisation opened with labelled synthetic data, separate from the real organisation")
         browser.close()
 
     print(f"\nE2E smoke test passed: {len(checks)} checks")

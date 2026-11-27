@@ -269,8 +269,8 @@ def reverse_allocation(db: Session, org: Organisation, actor_id: uuid.UUID, allo
 def create_invoice_manual(db: Session, org: Organisation, actor_id: uuid.UUID, *, customer_id: uuid.UUID,
                           invoice_number: str, issue_date: date, due_date: date, total_amount: str | None,
                           net_amount: str | None, tax_amount: str | None, reference: str | None,
-                          confirm_duplicate_number: bool = False) -> Invoice:
-    """Manual entry under the same rules as import (rules.md §8.12)."""
+                          confirm_duplicate_number: bool = False, entry_method: str = "manual") -> Invoice:
+    """Manual entry under the same rules as import (rules.md §8.12). entry_method='demo' for sample data."""
     from app.models import Customer
 
     if db.scalar(select(Customer.id).where(Customer.id == customer_id, Customer.organisation_id == org.id)) is None:
@@ -313,11 +313,12 @@ def create_invoice_manual(db: Session, org: Organisation, actor_id: uuid.UUID, *
     inv = Invoice(organisation_id=org.id, customer_id=customer_id, invoice_number=invoice_number.strip(),
                   normalised_number=norm, issue_date=issue_date, due_date=due_date, currency=org.currency,
                   total_amount=total, net_amount=net, tax_amount=tax, total_is_derived=derived,
-                  reference=(reference or "").strip() or None, status="open", version=1, entry_method="manual",
+                  reference=(reference or "").strip() or None, status="open", version=1, entry_method=entry_method,
                   created_by=actor_id)
     db.add(inv)
     db.flush()
-    record_version(db, inv, "entered manually", actor_id)
-    audit.record(db, action="invoice.created_manual", actor_user_id=actor_id, organisation_id=org.id,
-                 entity_type="invoice", entity_id=inv.id, after=invoice_values(inv), source="manual")
+    record_version(db, inv, "entered manually" if entry_method == "manual" else "demo sample data", actor_id)
+    audit.record(db, action="invoice.created_manual" if entry_method == "manual" else "invoice.created_demo",
+                 actor_user_id=actor_id, organisation_id=org.id, entity_type="invoice", entity_id=inv.id,
+                 after=invoice_values(inv), source=entry_method)
     return inv

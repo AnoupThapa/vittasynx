@@ -9,6 +9,7 @@ export type OrgInfo = {
   timezone: string;
   role: string;
   role_label: string;
+  is_demo?: boolean;
 };
 
 export type Me = {
