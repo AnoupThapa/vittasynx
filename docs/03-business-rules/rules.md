@@ -121,3 +121,12 @@ Invoices can be entered one at a time in the app as well as imported. Manual ent
 - **Duplicates:** the same customer and normalised number as an existing invoice is refused (409). The same number under a different customer is refused unless the user confirms it is a separate invoice.
 - **Record:** `entry_method = manual`, version 1 recorded with reason "entered manually", audit event `invoice.created_manual`.
 - **Corrections:** entered invoices are not edited in place. Use the status change (cancel or void, with a reason) and re-enter, or a credit note, so history stays intact.
+
+### 8.13 Demo organisation (owner request, 2026-11-27)
+A signed-in user can create one **demo organisation** filled with made-up data, to explore Vittasynx before entering real details.
+- It is a separate organisation flagged `is_demo`. Demo data never enters, or mixes with, a real organisation, and a demo organisation cannot be converted into a real one.
+- Every screen shows a "Demo organisation: synthetic data" banner, and every export says so in its header.
+- Data is generated through the normal services (so it is validated, versioned and audited) with `entry_method = demo`, relative to the creation date so the ageing looks current: 8 customers, about 45 invoices over the past 9 months, payments with varied timing (on time, late, partial), credit notes, one disputed and one cancelled invoice, one unapplied payment and one unassigned bank receipt. At least two customers meet the payment-behaviour threshold.
+- All names are fictional and marked "(Demo)".
+- One demo organisation per user; asking again opens the existing one.
+- Two-factor enforcement for Owners and Administrators is not applied inside a demo organisation, because it holds only synthetic data. It still applies to every real organisation.

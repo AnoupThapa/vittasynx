@@ -15,6 +15,7 @@ Approved by the product owner on 2026-11-27 (Phase 1 decisions D-02, D-04, D-05,
 10. Receivables dashboard.
 11. CSV export of invoice register, ageing report and customer balances.
 12. Audit history for imports, edits, allocations, memberships and settings.
+13. Manual invoice entry (rules.md §8.12) and a demo organisation with synthetic sample data (rules.md §8.13).
 
 ## Release 2 — Cash forecast (only after the Phase 6 gate is approved)
 - Supplier master records and supplier obligations.

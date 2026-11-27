@@ -121,7 +121,7 @@ class Invoice(IdMixin, CreatedMixin, TenantMixin, Base):
         CheckConstraint("status IN ('open','disputed','cancelled','void')", name="ck_invoices_status"),
         CheckConstraint("total_amount >= 0", name="ck_invoices_total_nonneg"),
         CheckConstraint("due_date >= issue_date", name="ck_invoices_due_after_issue"),
-        CheckConstraint("entry_method IN ('import','manual')", name="ck_invoices_entry_method"),
+        CheckConstraint("entry_method IN ('import','manual','demo')", name="ck_invoices_entry_method"),
         Index("ix_invoices_org_due", "organisation_id", "due_date"),
     )
     customer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("customers.id"), index=True, nullable=False)

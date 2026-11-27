@@ -72,6 +72,7 @@ def dashboard(db: Session, org: Organisation, as_at: date) -> dict:
         "generated_at": _generated(),
         "currency": cur,
         "rule_version": RULE_VERSION,
+        "is_demo": org.is_demo,
         "totals": {
             "total_outstanding": fmt(result.total_outstanding, cur),
             "overdue_total": fmt(result.overdue_total, cur),
@@ -237,5 +238,6 @@ def to_csv(rows: list[dict], columns: list[tuple[str, str]], preamble: list[tupl
 
 
 def preamble(org: Organisation, report: str, as_at: date) -> list[tuple[str, str]]:
-    return [("Report", report), ("Organisation", org.name), ("Reporting date", as_at.isoformat()),
+    demo = [("Data", "DEMO ORGANISATION — SYNTHETIC DATA, NOT REAL")] if org.is_demo else []
+    return demo + [("Report", report), ("Organisation", org.name), ("Reporting date", as_at.isoformat()),
             ("Currency", org.currency), ("Rule version", RULE_VERSION), ("Generated at (UTC)", _generated())]

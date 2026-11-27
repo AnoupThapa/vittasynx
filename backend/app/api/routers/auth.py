@@ -115,6 +115,7 @@ def me(session: UserSession = Depends(current_session), db: Session = Depends(ge
                 "name": m.organisation.name,
                 "currency": m.organisation.currency,
                 "timezone": m.organisation.timezone,
+                "is_demo": m.organisation.is_demo,
                 "role": m.role,
                 "role_label": ROLE_LABELS[m.role],
             }

@@ -30,8 +30,19 @@ BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PASSWORD = "correct horse battery staple"
 
 
+def _truncate_all() -> None:
+    with new_session() as db:
+        tables = db.execute(text(
+            "SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename <> 'alembic_version'"
+        )).scalars().all()
+        if tables:
+            db.execute(text("TRUNCATE " + ", ".join(tables) + " RESTART IDENTITY CASCADE"))
+        db.commit()
+
+
 @pytest.fixture(scope="session", autouse=True)
 def migrated_db():
+    _truncate_all()  # test data from a previous run must not block downgrades
     cfg = Config(os.path.join(BACKEND_DIR, "alembic.ini"))
     cfg.set_main_option("script_location", os.path.join(BACKEND_DIR, "migrations"))
     command.downgrade(cfg, "base")
@@ -41,12 +52,7 @@ def migrated_db():
 
 @pytest.fixture(autouse=True)
 def clean_db(migrated_db):
-    with new_session() as db:
-        tables = db.execute(text(
-            "SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename <> 'alembic_version'"
-        )).scalars().all()
-        db.execute(text("TRUNCATE " + ", ".join(tables) + " RESTART IDENTITY CASCADE"))
-        db.commit()
+    _truncate_all()
     yield
 
 
