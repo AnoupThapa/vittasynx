@@ -47,6 +47,11 @@ Nothing is deployed to staging or production, and no production data is changed,
 | **Python** | Financial calculations and forecasting | All balances, ageing, behaviour metrics and (Release 2) forecasts in `backend/app/domain/` using `decimal.Decimal`. |
 | **Playwright** | End-to-end browser testing | `e2e/` covers the core workflows through the real UI; run before any release candidate. |
 
+## Enforcement on GitHub
+- `.github/workflows/ci.yml` runs on every pull request and on `main`: backend tests on PostgreSQL 16 with a non-superuser role, a migration round-trip and drift check, frontend type check, unit tests and production build, then the Playwright end-to-end test.
+- `main` is protected: changes only by pull request, all CI jobs must pass, no force-pushes or deletion, and the rules apply to administrators too.
+- Required approvals are set to 0 because every pull request is opened under the owner's GitHub account, and GitHub does not let an author approve their own pull request. Independent review is still required by this document; the reviewer records it on the pull request.
+
 ## Change workflow
 1. **Document.** Update or cite the specification (principles 1 and 2).
 2. **Implement.** Claude Code builds the change on a branch, with tests (principle 4).
